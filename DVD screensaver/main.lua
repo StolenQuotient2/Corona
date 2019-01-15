@@ -5,7 +5,7 @@ physics.start()
 physics.setGravity(0,0)
 	
 local a = 50
-local hits = 0
+local hits = 1336
 local hitsText
 hitsText = display.newText("Collisions: "..hits, display.contentWidth/2, 60, native.systemFont, 40)
 
@@ -95,20 +95,28 @@ local function onCollision(event)
 		leetText = display.newText("YEET", display.contentWidth/2, display.contentHeight/2, native.systemFont, 96)
 		leetText:setFillColor(256,0,0)
 		
+		local function deleteYeet()
+			display.remove(leetText)
+		end
 		
-		timer.performWithDelay(1000, fix)
+		
+		timer.performWithDelay(1000, deleteYeet)
+		
 		
 		end
 		end
 		
 end
 
+
+	
+
 local function fix()
 	block1.x = block1.x - 10
 	block2.x = block2.x + 10
 	block1:setLinearVelocity(a, 0)
 	block2:setLinearVelocity(-a, 0)
-	display.remove(leetText)
+
 
 end
 
