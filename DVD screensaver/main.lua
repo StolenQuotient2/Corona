@@ -5,7 +5,7 @@ physics.start()
 physics.setGravity(0,0)
 	
 local a = 50
-local hits = 1336
+local hits = 0
 local hitsText
 hitsText = display.newText("Collisions: "..hits, display.contentWidth/2, 60, native.systemFont, 40)
 
@@ -45,6 +45,16 @@ wall4.x = 0
 wall4.y = display.contentHeight/2
 physics.addBody(wall4, "static")
 
+
+local function fix()
+	block1.x = block1.x - 10
+	block2.x = block2.x + 10
+	block1:setLinearVelocity(a, 0)
+	block2:setLinearVelocity(-a, 0)
+
+
+end
+
 local function onCollision(event)
 	
 	
@@ -59,12 +69,10 @@ local function onCollision(event)
 		if (obj1.myName and obj2.myName == "block")
 		then
 		
-		if hits <= 50 then
+		if hits <= 55 then
 		a = a*2
 		end
 		
-		
-	
 		
 		if obj1.x > 500 then
 		obj1:setLinearVelocity(a, 0)
@@ -101,6 +109,7 @@ local function onCollision(event)
 		
 		
 		timer.performWithDelay(1000, deleteYeet)
+		fix()
 		
 		
 		end
@@ -111,14 +120,6 @@ end
 
 	
 
-local function fix()
-	block1.x = block1.x - 10
-	block2.x = block2.x + 10
-	block1:setLinearVelocity(a, 0)
-	block2:setLinearVelocity(-a, 0)
-
-
-end
 
 Runtime:addEventListener("collision", onCollision)
 block1:addEventListener("tap", fix)
