@@ -1,10 +1,4 @@
------------------------------------------------------------------------------------------
---
--- main.lua
---
------------------------------------------------------------------------------------------
 
--- Your code here
 
 local physics = require("physics")
 physics.start()
@@ -53,17 +47,25 @@ physics.addBody(wall4, "static")
 
 local function onCollision(event)
 	
+	
+	
 	if event.phase == "began" then
 	local obj1 = event.object1
 	local obj2 = event.object2
 	
 	
-		if (obj1.myName == "block" and obj2.myName == "block")
+		
+	
+		if (obj1.myName and obj2.myName == "block")
 		then
 		
-		if hits <= 30 then
+		if hits <= 50 then
 		a = a*2
 		end
+		
+		
+	
+		
 		if obj1.x > 500 then
 		obj1:setLinearVelocity(a, 0)
 		obj2:setLinearVelocity(-a, 0)
@@ -78,12 +80,27 @@ local function onCollision(event)
 		end
 		if hits >= 7 then
 		obj1:applyTorque(math.random(1,6))
-		obj2:applyTorque(math.random(1,3))
+		obj2:applyTorque(-1*math.random(1,6))
+		end
 		
 		
 		end
+		if hits == 1337 or hits == 9001 then
+		
+		obj1:setLinearVelocity(0,0)
+		obj2:setLinearVelocity(0,0)
+		
+		
+		local leetText 
+		leetText = display.newText("YEET", display.contentWidth/2, display.contentHeight/2, native.systemFont, 96)
+		leetText:setFillColor(256,0,0)
+		
+		
+		timer.performWithDelay(1000, fix)
+		
 		end
-	end
+		end
+		
 end
 
 local function fix()
@@ -91,6 +108,8 @@ local function fix()
 	block2.x = block2.x + 10
 	block1:setLinearVelocity(a, 0)
 	block2:setLinearVelocity(-a, 0)
+	display.remove(leetText)
+
 end
 
 Runtime:addEventListener("collision", onCollision)
