@@ -7,6 +7,7 @@
 -- hide the status bar
 display.setStatusBar(display.HiddenStatusBar)
 
+-- Variable and Lives and Score Text
 local lives = 3
 local livesText
 local score = 0
@@ -16,11 +17,13 @@ local died = false
 livesText = display.newText("Lives:" .. lives,650,40,native.systemFont,36)
 scoreText = display.newText("Score:" .. score,100,40,native.systemFont,36)
 
-
+--Physics
 local physics = require("physics")
 physics.start()
 physics.setGravity(0,0)
 
+
+-- Object Defining
 local redBlock = display.newImageRect("redBlock.png", 74, 74)
 redBlock.x = 600
 redBlock.y = 800
@@ -33,6 +36,9 @@ blueBlock.y = display.contentHeight/2
 physics.addBody(blueBlock, "dynamic", {box = 37, 37, 0, 0, 0})
 blueBlock.myName = "block"
 blueBlock:setLinearVelocity(100,100)
+
+
+
 local function restore()
 
 	redBlock.isBodyActive = false
@@ -52,24 +58,31 @@ local function restore()
 	end})
 end
 
-local chaseText
+local chaseText -- Tracking Text
 local chaseDir = ""
 chaseText = display.newText(chaseDir, 400, 40, native.systemFont, 36)
+
+
 local function chase()
 
 if died == false then
 local a = (redBlock.x - blueBlock.x)
 local b = (redBlock.y - blueBlock.y)
 
-if b == 0 then
+if b == 0 then -- /0 prevention
 b = b + 1
 end
 
-local z = a/b
-local v = math.sqrt(a^2+b^2) / 1.2
-if v < 200 then
+-- Variable Calculations
+local z = a/b -- Ratio of x/y, used to set x and y velocities in the correct ratio
+local v = math.sqrt(a^2+b^2) / 1.2 + score/((4-lives)*100) -- Velocity Calculation
+if v < 200 then -- Minimum Speed
 v = 200
+
 end
+
+-- Tracking and Calculation of Velocities
+
 if a < 0 and b < 0 then -- Top Left
 chaseDir = "TL"
 chaseText.text = chaseDir
@@ -109,7 +122,7 @@ local x = v - y
 blueBlock:setLinearVelocity(x,y)
 
 end
-if died == false then
+if died == false then -- Score Updater
 score = score + 1
 scoreText.text = "Score: "..score
 end
@@ -119,6 +132,7 @@ end
 	
 local gameLoopTimer
 gameLoopTimer = timer.performWithDelay(10, chase, 0)
+
 
 local function onCollision(event)
 	
