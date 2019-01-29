@@ -38,7 +38,7 @@ blueBlock.myName = "block"
 blueBlock:setLinearVelocity(100,100)
 
 
-
+-- Reset Function
 local function restore()
 
 	redBlock.isBodyActive = false
@@ -58,6 +58,7 @@ local function restore()
 	end})
 end
 
+
 local chaseText -- Tracking Text
 local chaseDir = ""
 chaseText = display.newText(chaseDir, 400, 40, native.systemFont, 36)
@@ -65,73 +66,96 @@ chaseText = display.newText(chaseDir, 400, 40, native.systemFont, 36)
 
 local function chase()
 
-if died == false then
-local a = (redBlock.x - blueBlock.x)
-local b = (redBlock.y - blueBlock.y)
+	if died == false then
+	local a = (redBlock.x - blueBlock.x)
+	local b = (redBlock.y - blueBlock.y)
 
-if b == 0 then -- /0 prevention
-b = b + 1
-end
+	if b == 0 then -- /0 prevention
+	b = b + 1
+	end
 
--- Variable Calculations
-local z = a/b -- Ratio of x/y, used to set x and y velocities in the correct ratio
-local v = math.sqrt(a^2+b^2) / 1.2 + score/((4-lives)*100) -- Velocity Calculation
-if v < 200 then -- Minimum Speed
-v = 200
+	-- Variable Calculations
+	local z = a/b -- Ratio of x/y, used to set x and y velocities in the correct ratio
+	
+	local v = math.sqrt(a^2+b^2) / 1.2 + score/250 -- Velocity Calculation
+	
+	if v < 200 then -- Minimum Speed
+	v = 200
+	end
 
-end
+	-- Tracking and Calculation of Velocities
 
--- Tracking and Calculation of Velocities
+		if a < 0 and b < 0 then -- Top Left
+		chaseDir = "TL"
+		chaseText.text = chaseDir
+		local x = -z * (v/(z+1))
+		local y = x - v
+		blueBlock:setLinearVelocity(x,y)
 
-if a < 0 and b < 0 then -- Top Left
-chaseDir = "TL"
-chaseText.text = chaseDir
-local x = -z * (v/(z+1))
-local y = x - v
-blueBlock:setLinearVelocity(x,y)
+		elseif b < 0 and a > 0 then -- Top Right
+		chaseDir = "TR"
+		chaseText.text = chaseDir
+		local x = z * (v/(z-1))
+		local y = x - v
+		blueBlock:setLinearVelocity(x,y)
 
-elseif b < 0 and a > 0 then -- Top Right
-chaseDir = "TR"
-chaseText.text = chaseDir
-local x = z * (v/(z-1))
-local y = x - v
-blueBlock:setLinearVelocity(x,y)
-
-elseif a < 0 and b >= 0 then -- Bottom Left
-chaseDir = "BL"
-chaseText.text = chaseDir
-local y = z * (v/(z-1))
-local x = y - v
-blueBlock:setLinearVelocity(x,y)
+		elseif a < 0 and b >= 0 then -- Bottom Left
+		chaseDir = "BL"
+		chaseText.text = chaseDir
+		local y = z * (v/(z-1))
+		local x = y - v
+		blueBlock:setLinearVelocity(x,y)
 
 
-elseif a > -5 and a < 5 then -- Horizontal/Vertical Cases
-chaseDir = "V"
-chaseText.text = chaseDir
-blueBlock:setLinearVelocity(0,b)
-elseif b > -5 and b < 5 then
-chaseDir = "H"
-chaseText.text = chaseDir
-blueBlock:setLinearVelocity(a,0)
+		elseif a > -5 and a < 5 then -- Horizontal/Vertical Cases
+		chaseDir = "V"
+		chaseText.text = chaseDir
+		blueBlock:setLinearVelocity(0,b)
+		elseif b > -5 and b < 5 then
+		chaseDir = "H"
+		chaseText.text = chaseDir
+		blueBlock:setLinearVelocity(a,0)
 
-else -- Bottom Right
-chaseDir = "BR"
-chaseText.text = chaseDir
-local y = z * (v/(z+1))
-local x = v - y
-blueBlock:setLinearVelocity(x,y)
-
-end
-if died == false then -- Score Updater
-score = score + 1
-scoreText.text = "Score: "..score
-end
-end
+		else -- Bottom Right
+		chaseDir = "BR"
+		chaseText.text = chaseDir
+		local y = z * (v/(z+1))
+		local x = v - y
+		blueBlock:setLinearVelocity(x,y)
+		end
+		
+	if died == false then -- Score Updater
+	score = score + 1
+	scoreText.text = "Score: "..score
+	end
+	end
 end
 
 	
 local gameLoopTimer
 gameLoopTimer = timer.performWithDelay(10, chase, 0)
+
+local function gameEnd()
+	local highScore = 100
+	local highScoreText
+	
+	local save = assert(io.open("/Users/sthiel22/Desktop/Corona/Don\'t Touch ME/save.txt", "r")) --High Score Retrieval
+highScore = save:read("*line")
+highScore = tonumber(highScore)
+save:close()
+	
+	
+	if score > highScore then
+	highScore = score
+	end
+	highScoreText = display.newText("Your highscore is:\n"..highScore, display.contentCenterX, display.contentCenterY, native.systemFont, 80)
+	
+	local save = assert(io.open("/Users/sthiel22/Desktop/Corona/Don\'t Touch ME/save.txt", "w")) --High Score Saving
+save:write(highScore, "\n")
+save:close()
+	
+	timer.cancel(gameLoopTimer)
+end
 
 
 local function onCollision(event)
@@ -146,9 +170,15 @@ local function onCollision(event)
 	lives = lives - 1
 	livesText.text = "Lives:"..lives
 			end
-	if lives == 0 then
+			
+			
+	if lives == 0 then 
+	-- Game End Detection
 		display.remove(redBlock)
+		display.remove(blueBlock)
+		timer.performWithDelay(500, gameEnd)
 	else
+	--Continue?
 		redBlock.alpha = 0
 		blueBlock.alpha = 0
 		timer.performWithDelay(1000,restore)
